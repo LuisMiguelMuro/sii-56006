@@ -16,7 +16,7 @@ Este repositorio contiene el material utilizado en las prácticas de la asignatu
 
 El objetivo de la asignatura es introducir en el desarrollo de aplicaciones para sistemas informáticos industriales, haciendo especial énfasis en el uso del lenguaje C y del sistema operativo Linux.
 
----
+El repositorio actual es el del alumno con número de matrícula 56006. Este alumno se encuentra actualmente realizando la primera práctica---
 
 ## 📚 Wiki
 
