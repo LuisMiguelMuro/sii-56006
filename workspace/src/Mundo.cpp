@@ -156,9 +156,17 @@ void CMundo::OnKeyboardDown(unsigned char key, int x, int y)
 //	case 'd':jugador1.velocidad.x=1;break;
 	case 's':jugador1.velocidad.y=-4;break;
 	case 'w':jugador1.velocidad.y=4;break;
-	case 'l':jugador2.velocidad.y=-4;break;
-	case 'o':jugador2.velocidad.y=4;break;
+//	case 'l' :jugador2.velocidad.y=-4;break;
+//	case 'o' :jugador2.velocidad.y=4;break;
+	}
+}
 
+void CMundo::OnSpecialKeyboardDown(int key, int x, int y)
+{
+	switch (key)
+	{
+		case GLUT_KEY_DOWN : jugador2.velocidad.y = -4;break;
+		case GLUT_KEY_UP : jugador2.velocidad.y = 4;break;
 	}
 }
 
