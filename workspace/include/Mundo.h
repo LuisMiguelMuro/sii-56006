@@ -22,7 +22,9 @@ public:
 	CMundo();
 	virtual ~CMundo();	
 	
-	void InitGL();	
+	void InitGL();
+	void OnKeyboardUp (unsigned char key, int x, int y);
+	void OnSpecialKeyboardUp (int key, int x, int y);	
 	void OnKeyboardDown(unsigned char key, int x, int y);
 	void OnSpecialKeyboardDown(int key, int x, int y);
 	void OnTimer(int value);
@@ -37,6 +39,8 @@ public:
 
 	int puntos1;
 	int puntos2;
+
+	int fd;
 };
 
 #endif // !defined(AFX_MUNDO_H__9510340A_3D75_485F_93DC_302A43B8039A__INCLUDED_)

@@ -1,1 +1,5 @@
+#Archivos de compilación 
 build
+
+#Copias de seguridad de editores
+*.save

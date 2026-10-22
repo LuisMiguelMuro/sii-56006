@@ -10,6 +10,12 @@
 #include <string.h>
 #include <math.h>
 
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <stdio.h>
+
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -21,7 +27,7 @@ CMundo::CMundo()
 
 CMundo::~CMundo()
 {
-
+	close(fd);
 }
 
 void CMundo::InitGL()
@@ -135,6 +141,20 @@ void CMundo::OnTimer(int value)
 		esfera.velocidad.x=2+2*rand()/(float)RAND_MAX;
 		esfera.velocidad.y=2+2*rand()/(float)RAND_MAX;
 		puntos2++;
+		char mensaje[128];
+		if (puntos2 < 3){
+		int longitud = snprintf(mensaje, sizeof(mensaje),
+		"Jugador 2 marca 1 punto, lleva un total de %d puntos.\n",
+		puntos2);
+		write(fd,mensaje,longitud);
+		}
+		else{
+		int longitud = snprintf(mensaje, sizeof(mensaje),
+		"¡Jugador 2 gana!, el marcador final es, P1: %d, P2: %d",
+		 puntos1, puntos2);
+		write(fd,mensaje,longitud);
+		exit(0);
+		}
 	}
 
 	if(fondo_dcho.Rebota(esfera))
@@ -144,6 +164,21 @@ void CMundo::OnTimer(int value)
 		esfera.velocidad.x=-2-2*rand()/(float)RAND_MAX;
 		esfera.velocidad.y=-2-2*rand()/(float)RAND_MAX;
 		puntos1++;
+                char mensaje[128];
+                if (puntos1 < 3){
+                int longitud = snprintf(mensaje, sizeof(mensaje),
+                "Jugador 1 marca 1 punto, lleva un total de %d puntos.\n",
+                puntos1);
+                write(fd,mensaje,longitud);
+                }
+                else{
+                int longitud = snprintf(mensaje, sizeof(mensaje),
+                "¡Jugador 1 gana!, el marcador final es, P1: %d, P2: %d", 
+                 puntos1, puntos2);
+                write(fd,mensaje,longitud);
+                exit(0);
+                }
+
 	}
 
 }
@@ -161,6 +196,14 @@ void CMundo::OnKeyboardDown(unsigned char key, int x, int y)
 	}
 }
 
+void CMundo::OnKeyboardUp(unsigned char key, int x, int y)
+{
+	switch(key){
+	case 's': jugador1.velocidad.y = 0;break;
+	case 'w': jugador1.velocidad.y = 0;break;
+	}
+}
+
 void CMundo::OnSpecialKeyboardDown(int key, int x, int y)
 {
 	switch (key)
@@ -170,8 +213,26 @@ void CMundo::OnSpecialKeyboardDown(int key, int x, int y)
 	}
 }
 
+void CMundo::OnSpecialKeyboardUp(int key, int x, int y)
+{
+	switch(key){
+	case GLUT_KEY_DOWN : jugador2.velocidad.y = 0;break;
+	case GLUT_KEY_UP : jugador2.velocidad.y = 0;break;
+	}
+}
+
 void CMundo::Init()
 {
+	
+	fd = open("my_fifo", O_WRONLY);
+	
+	if (fd == -1){
+		perror("Error al abrir my_fifo");
+		return;
+	}
+
+	printf("FIFO abierta correctamente. fd = %d\n", fd);	
+
 	Plano p;
 //pared inferior
 	p.x1=-7;p.y1=-5;
