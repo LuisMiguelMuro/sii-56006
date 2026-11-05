@@ -10,6 +10,7 @@
 #include <string.h>
 #include <math.h>
 
+#include <sys/mman.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -120,7 +121,16 @@ void CMundo::OnDraw()
 }
 
 void CMundo::OnTimer(int value)
-{	
+{
+
+	//control de raqueta mediante el bot.cpp
+
+//	printf(" %d\n",dat->accion);
+
+	if(dat->accion == 1)	{jugador1.velocidad.y = 4;}
+	else if(dat->accion == -1)	{jugador1.velocidad.y = -4;}
+	else {jugador1.velocidad.y = 0;}	
+
 	jugador1.Mueve(0.025f);
 	jugador2.Mueve(0.025f);
 	esfera.Mueve(0.025f);
@@ -141,6 +151,9 @@ void CMundo::OnTimer(int value)
 		esfera.velocidad.x=2+2*rand()/(float)RAND_MAX;
 		esfera.velocidad.y=2+2*rand()/(float)RAND_MAX;
 		puntos2++;
+
+		dat->puntos2 = puntos2;
+
 		char mensaje[128];
 		if (puntos2 < 3){
 		int longitud = snprintf(mensaje, sizeof(mensaje),
@@ -163,7 +176,10 @@ void CMundo::OnTimer(int value)
 		esfera.centro.y=rand()/(float)RAND_MAX;
 		esfera.velocidad.x=-2-2*rand()/(float)RAND_MAX;
 		esfera.velocidad.y=-2-2*rand()/(float)RAND_MAX;
+
 		puntos1++;
+		dat->puntos1 = puntos1;
+
                 char mensaje[128];
                 if (puntos1 < 3){
                 int longitud = snprintf(mensaje, sizeof(mensaje),
@@ -177,10 +193,12 @@ void CMundo::OnTimer(int value)
                  puntos1, puntos2);
                 write(fd,mensaje,longitud);
                 exit(0);
-                }
+         	}
 
 	}
 
+	dat->esfera = esfera;
+	dat->raqueta1 = jugador1;
 }
 
 void CMundo::OnKeyboardDown(unsigned char key, int x, int y)
@@ -189,8 +207,8 @@ void CMundo::OnKeyboardDown(unsigned char key, int x, int y)
 	{
 //	case 'a':jugador1.velocidad.x=-1;break;
 //	case 'd':jugador1.velocidad.x=1;break;
-	case 's':jugador1.velocidad.y=-4;break;
-	case 'w':jugador1.velocidad.y=4;break;
+//	case 's':jugador1.velocidad.y=-4;break;
+//	case 'w':jugador1.velocidad.y=4;break;
 //	case 'l' :jugador2.velocidad.y=-4;break;
 //	case 'o' :jugador2.velocidad.y=4;break;
 	}
@@ -232,6 +250,42 @@ void CMundo::Init()
 	}
 
 	printf("FIFO abierta correctamente. fd = %d\n", fd);	
+
+	int fd_mem = open("DatosCompartidos", O_CREAT | O_RDWR, 0666);
+
+	if (fd_mem < 0)
+	{
+		perror("Error al crear el fichero compartido");
+		return;
+	}
+	
+	if(ftruncate(fd_mem,sizeof(DatosMemCompartida))<0)
+	{
+		perror("Error en ftruncate");
+		close(fd_mem);
+		return;
+	}
+	
+	dat =(DatosMemCompartida*) mmap(
+		NULL,
+		sizeof(DatosMemCompartida),
+		PROT_READ | PROT_WRITE,
+		MAP_SHARED,
+		fd_mem,
+		0
+	);
+
+	if(dat == MAP_FAILED)
+	{
+		perror("Error en map");
+		dat = nullptr;
+		close(fd_mem);
+		return;
+	}
+
+	close(fd_mem);
+
+	dat->accion = 0;
 
 	Plano p;
 //pared inferior
